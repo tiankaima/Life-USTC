@@ -20,10 +20,10 @@ struct HomeView: View {
                subTitle: currentDateString,
                destination: .init(AllSourceView()),
                preview: .init(FeedHScrollView())),
-         .init(title: "Health Check",
-               subTitle: "",
-               destination: .init(HealthCheckPage()),
-               preview: .init(HealthCheckPreview())),
+//         .init(title: "Health Check",
+//               subTitle: "",
+//               destination: .init(HealthCheckPage()),
+//               preview: .init(HealthCheckPreview())),
          .init(title: "Curriculum",
                subTitle: currentWeekDayString,
                destination: .init(CurriculumView()),
@@ -52,6 +52,16 @@ struct HomeView: View {
             }
             .padding([.leading, .trailing])
             .navigationTitle("Life@USTC")
+            .onAppear {
+                if let lastReportedHealth = UstcWeixinClient.main.lastReportedHealth {
+                    if lastReportedHealth.addingTimeInterval(60 * 60 * 8) > Date() {
+                        return
+                    }
+                }
+                Task {
+                    try await UstcWeixinClient.main.dailyReportHealth()
+                }
+            }
         }
     }
 }
